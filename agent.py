@@ -23,7 +23,7 @@ custom_theme = Theme({
 })
 
 console = Console(theme=custom_theme)
-
+saveMessages = open("messages.txt", "w")
 
 # Define function registry
 functionRegistry = {
@@ -102,14 +102,20 @@ while True:
     })
     console.print(agentPanel)
     while True:
-        response = complete(messages)
+        try:
+            response = complete(messages)
+        except Exception as e:
+            saveMessages.write(str(messages))
         messages.append(response)
 
         if response.tool_calls:
             for tool_call in response.tool_calls:
                 id = tool_call.id
                 name = tool_call.function.name
-                args = json.loads(tool_call.function.arguments)
+                args = tool_call.function.arguments
+                if isinstance(args, str):
+                    args = json.loads(args)
+                    
                 panelText = Text("Tool: ", style="bold blue") + Text(name, style="bold white") + "\n"
                 if args:
                     for arg in args:
