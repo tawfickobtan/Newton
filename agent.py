@@ -23,7 +23,7 @@ custom_theme = Theme({
 })
 
 console = Console(theme=custom_theme)
-saveMessages = open("messages.txt", "w")
+saveMessages = open("messages.txt", "w",encoding="utf-8")
 
 # Define function registry
 functionRegistry = {
