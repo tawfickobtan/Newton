@@ -56,8 +56,7 @@ functionRegistry = {
     "recallFact": tools.recallFact,
     "forgetFact": tools.forgetFact,
     "listMemories": tools.listMemories,
-    "addVectorMemory": tools.addVectorMemory,
-    "queryVectorMemory": tools.queryVectorMemory,
+    "getDirectoryTree": tools.getDirectoryTree
 }
 
 # Create welcome message
@@ -88,7 +87,7 @@ agent = Agent(
     function_registry=functionRegistry,
     system_prompt=systemPrompt + "\n" +
     f"Current Directory: {tools.getCurrentDirectory()}\n" +
-    f"Items in Current Directory: {tools.getItemsInPath(tools.getCurrentDirectory())}\n" +
+    f"Current Directory Structure (to a depth of 3): {tools.getDirectoryTree(tools.getCurrentDirectory(), 3)}\n" +
     f"Stored Memories: {tools.listMemories()}\n" +
     f"Model Powering you: {config.get('model', 'llama-3.3-70b-versatile')}"
                 )

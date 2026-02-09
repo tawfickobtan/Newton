@@ -334,41 +334,22 @@
   {
     "type": "function",
     "function": {
-      "name": "addVectorMemory",
-      "description": "Adds a piece of information to vector memory for later retrieval based on similarity.",
+      "name": "getDirectoryTree",
+      "description": "Returns a tree structure representing the directory and file hierarchy starting from the specified path. Returns to a maximum depth of 5 levels.",
       "parameters": {
         "type": "object",
         "properties": {
-          "text": {
+          "path": {
             "type": "string",
-            "description": "The piece of information to be added to vector memory."
-          }
-        },
-        "required": ["text"]
-      }
-  }
-},
-  {
-    "type": "function",
-    "function": {
-      "name": "queryVectorMemory",
-      "description": "Queries vector memory for information similar to the given query text and returns the most relevant pieces of information.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "query": {
-            "type": "string",
-            "description": "The query text to search for in vector memory."
+            "description": "The path of the directory to start from."
           },
-          "k": {
+          "depth": {
             "type": "integer",
-            "description": "Number of relevant pieces of information to return (default is 3).",
-            "default": 3
+            "description": "The maximum depth to traverse (default is 2)."
           }
         },
-        "required": ["query"]
+        "required": ["path"]
       }
     }
   }
-  
 ]

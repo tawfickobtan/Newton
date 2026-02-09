@@ -2,8 +2,6 @@ import json
 import os
 import subprocess
 import time
-from sentence_transformers import SentenceTransformer
-
 
 forbidden = [
     "agent.py",
@@ -26,26 +24,27 @@ try:
 except Exception as e:
     memory = {}
 
-vector_embeddings = {}
-try:
-    with open("vector_embeddings.json", "r", encoding="utf-8") as f:
-        vector_embeddings = json.load(f)
-except Exception as e:
-    vector_embeddings = {}
-_embedding_model = None
-
-vector_memory = {}
-try:
-    with open("vector_memory.json", "r", encoding="utf-8") as f:
-        vector_memory = json.load(f)
-except Exception as e:
-    vector_memory = {}
-
-
 def getItemsInPath(path: str) -> str:
     try:
         items = os.listdir(path)
         return "\n".join(items)
+    except Exception as e:
+        return "Error occured. " + str(e)
+    
+def getDirectoryTree(path: str, depth: int = 2) -> str:
+    if depth > 5:
+        return "Depth too large. Please choose a depth of 5 or less to avoid excessive output."
+    tree = ""
+    try:
+        for root, dirs, files in os.walk(path):
+            level = root.replace(path, "").count(os.sep)
+            if level < depth:
+                indent = " " * 4 * level
+                tree += f"{indent}{os.path.basename(root)}/\n"
+                subindent = " " * 4 * (level + 1)
+                for f in files:
+                    tree += f"{subindent}{f}\n"
+        return tree if tree else "Directory is empty."
     except Exception as e:
         return "Error occured. " + str(e)
 
@@ -230,54 +229,5 @@ def listMemories() -> str:
     except Exception as e:
         return "Error occured: " + str(e)
 
-# Tool functions for embedding memory management
-def _get_embedding_model():
-    """Lazy loads the sentence transformer model only when needed"""
-    global _embedding_model
-    if _embedding_model is None:
-        _embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-    return _embedding_model
-
-def _compute_embedding(text: str) -> list:
-    model = _get_embedding_model()
-    embedding = model.encode(text).tolist()
-    return embedding
-
-def _cosine_similarity(vecA: list, vecB: list) -> float:
-    import numpy as np
-    a = np.array(vecA)
-    b = np.array(vecB)
-    if np.linalg.norm(a) == 0 or np.linalg.norm(b) == 0:
-        return 0.0
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-
-def addVectorMemory(text: str) -> str:
-    embedding = _compute_embedding(text)
-    id = int(time.time() * 1000)
-    vector_embeddings[str(id)] = embedding
-    vector_memory[str(id)] = text
-    try:
-        with open("vector_embeddings.json", "w", encoding="utf-8") as f:
-            json.dump(vector_embeddings, f, indent=4)
-        with open("vector_memory.json", "w", encoding="utf-8") as f:
-            json.dump(vector_memory, f, indent=4)
-        return "Vector memory added successfully."
-    except Exception as e:
-        return "Error occured: " + str(e)
-
-def queryVectorMemory(query: str, k: int = 3) -> str:
-    query_embedding = _compute_embedding(query)
-    similarities = []
-    for id, embedding in vector_embeddings.items():
-        sim = _cosine_similarity(query_embedding, embedding)
-        similarities.append((sim, id))
-    similarities.sort(reverse=True, key=lambda x: x[0])
-    top_k = similarities[:k]
-    results = []
-    for sim, id in top_k:
-        results.append(f"Memory: {vector_memory[id]}\nSimilarity: {sim:.4f}")
-    return "\n\n".join(results) if results else "No relevant memories found."
     
-
-
 
